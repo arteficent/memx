@@ -1,0 +1,15 @@
+# Build output, dependencies, and generated assets
+target/
+node_modules/
+ui/dist/
+icons/
+gen/
+graphify-out/
+
+# Binary or bulky inputs that add no structure to the code graph
+*.png
+*.svg
+*.woff2
+*.lock
+package-lock.json
+docs/assets/fonts/

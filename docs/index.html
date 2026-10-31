@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f5f7f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111615" media="(prefers-color-scheme: dark)">
+  <title>memx | Windows process memory inspector</title>
+  <meta name="description" content="memx is a read-only Windows process memory inspector built with Rust and Tauri. Browse every process, map memory regions, decode typed values with provenance, and capture point-in-time dumps.">
+  <meta property="og:title" content="memx | Windows process memory inspector">
+  <meta property="og:description" content="Browse process memory, decode typed values, follow pointers, and capture point-in-time dumps on Windows.">
+  <meta property="og:image" content="assets/screenshots/overview.png">
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <script>document.documentElement.classList.remove('no-js');</script>
+</head>
+<body>
+  <!-- Icons: Lucide (https://lucide.dev), ISC License. Fonts: IBM Plex, SIL Open Font License 1.1 (assets/fonts/OFL.txt). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+    <symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+    <symbol id="i-binary" viewBox="0 0 24 24"><rect x="14" y="14" width="4" height="6" rx="2"/><rect x="6" y="4" width="4" height="6" rx="2"/><path d="M6 20h4M14 10h4M6 14h2v6M14 4h2v6"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="30" height="30">memx</a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#features">Features</a>
+        <a href="#tour">Tour</a>
+        <a href="#how">How it works</a>
+        <a href="#cli">Command line</a>
+        <a href="#limits">Access limits</a>
+        <a href="#build">Build</a>
+        <a href="#license">License</a>
+      </nav>
+      <a class="button small" href="https://github.com/arteficent/memx"><svg class="icon"><use href="#i-github"/></svg><span>GitHub</span></a>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="hero" id="top">
+      <div class="wrap">
+        <div class="hero-copy">
+          <span class="eyebrow"><svg class="icon"><use href="#i-binary"/></svg>Windows process memory inspector</span>
+          <h1>See exactly what a process holds in memory.</h1>
+          <p class="lede">memx lists every running process, maps its address space, and turns raw bytes into typed values. Each value shows whether it came from debug symbols, C++ type information, your choice, or a labeled guess.</p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/arteficent/memx/releases/latest"><svg class="icon"><use href="#i-download"/></svg>Download for Windows</a>
+            <a class="button" href="#tour">Take the tour</a>
+          </div>
+          <ul class="facts" aria-label="At a glance">
+            <li>x64 and x86 builds</li>
+            <li>Read-only</li>
+            <li>GUI, CLI, and TUI in one exe</li>
+            <li>Rust + Tauri</li>
+            <li><a href="#license">Open source: MIT OR Apache-2.0</a></li>
+          </ul>
+        </div>
+        <div class="window">
+          <div class="window-bar" aria-hidden="true"><span></span><span></span><span></span><b>memx | Memory Inspector</b></div>
+          <picture><source srcset="assets/screenshots/overview-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/overview.png" width="1440" height="900" alt="memx desktop window with a process selected, its memory regions listed, a hex dump, and decoded values labeled with their source."></picture>
+        </div>
+      </div>
+    </div>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Features</span>
+          <h2>Everything you need to read a running process</h2>
+          <p>Pick a process and start reading. memx only requests the Windows access it needs to inspect memory and never writes to the target.</p>
+        </div>
+        <div class="features">
+          <article class="feature"><svg class="icon"><use href="#i-cpu"/></svg><h3>Every process, one list</h3><p>User and system processes, with owner, session, and an access badge. Processes you cannot read stay listed with the reason.</p></article>
+          <article class="feature"><svg class="icon"><use href="#i-layers"/></svg><h3>Regions, modules, symbols</h3><p>Browse committed regions labeled as heaps, stacks, module sections, PEB, or mapped files. Jump to any module or PDB global.</p></article>
+          <article class="feature"><svg class="icon"><use href="#i-braces"/></svg><h3>Typed values with provenance</h3><p>Decode integers, floats, strings, GUIDs, timestamps, and pointers. Every value is tagged symbol, RTTI, user, or heuristic.</p></article>
+          <article class="feature"><svg class="icon"><use href="#i-route"/></svg><h3>Follow pointers</h3><p>Pointers show where they land, such as a heap, a module, or a C++ class. Follow them with one click and step back through history.</p></article>
+          <article class="feature"><svg class="icon"><use href="#i-camera"/></svg><h3>Point-in-time dumps</h3><p>Capture a full-memory <code>.dmp</code> through Windows Process Snapshotting. Open it in WinDbg; existing files are never overwritten.</p></article>
+          <article class="feature"><svg class="icon"><use href="#i-terminal"/></svg><h3>GUI, CLI, and TUI</h3><p>One executable: launch it for the desktop app, or pass a command such as <code>ps</code>, <code>read</code>, or <code>dump</code> for scripting and JSON.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="tour" id="tour">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Tour</span>
+          <h2>A quick walk through the app</h2>
+          <p>Screenshots use a demo process with known values and match your light or dark theme. User names and paths are anonymized.</p>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Screenshots">
+          <button class="tab" role="tab" id="tab-browse" aria-controls="panel-browse" aria-selected="true">Browse</button>
+          <button class="tab" role="tab" id="tab-symbols" aria-controls="panel-symbols" aria-selected="false" tabindex="-1">Symbols</button>
+          <button class="tab" role="tab" id="tab-dump" aria-controls="panel-dump" aria-selected="false" tabindex="-1">Dump</button>
+          <button class="tab" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" tabindex="-1">Settings</button>
+          <button class="tab" role="tab" id="tab-compact" aria-controls="panel-compact" aria-selected="false" tabindex="-1">Compact</button>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-browse" aria-labelledby="tab-browse">
+          <figure><picture><source srcset="assets/screenshots/overview-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/overview.png" width="1440" height="900" loading="lazy" alt="Heap memory of the demo process decoded into integers, a double, floats, and strings."></picture></figure>
+          <div><h3>Browse and decode</h3><p>Select a process, click a region, and memx reads it page by page. Unreadable bytes show as <code>??</code>, so a gap is never mistaken for data.</p><ul><li>Choose Auto, or force a type such as <code>u64</code>, <code>f64</code>, or <code>wstr</code></li><li>Page forward and back through memory</li><li>Refresh to re-read live values</li></ul></div>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-symbols" aria-labelledby="tab-symbols" hidden>
+          <figure><picture><source srcset="assets/screenshots/symbols-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/symbols.png" width="1440" height="900" loading="lazy" alt="A global struct decoded from its PDB, showing named fields with high-confidence symbol provenance."></picture></figure>
+          <div><h3>Exact types from PDBs</h3><p>Turn on PDB symbols in Settings and enter <code>module!symbol</code>. Struct fields show their declared names and types.</p><ul><li>Symbol path supports <code>_NT_SYMBOL_PATH</code> syntax</li><li>Export tables name functions even without PDBs</li><li>MSVC RTTI identifies C++ objects and vtables</li></ul></div>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-dump" aria-labelledby="tab-dump" hidden>
+          <figure><picture><source srcset="assets/screenshots/dump-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/dump.png" width="1440" height="900" loading="lazy" alt="Notice confirming a process dump was saved, with capture time and limitations."></picture></figure>
+          <div><h3>Capture a snapshot</h3><p>Click the download icon next to the process name and choose where to save. memx clones the process memory first, then writes a standard minidump from that copy.</p><ul><li>Records capture start and finish times</li><li>Removes partial files when a capture fails</li><li>Dumps can contain secrets, so store them in a protected folder</li></ul></div>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" hidden>
+          <figure><picture><source srcset="assets/screenshots/settings-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/settings.png" width="1440" height="900" loading="lazy" alt="Settings dialog with sign-in startup, PDB symbols, and symbol search path."></picture></figure>
+          <div><h3>Startup and symbols</h3><p>Choose whether memx starts with administrator rights when you sign in, and where it looks for PDB files.</p><ul><li>Startup uses a Task Scheduler entry for your account only</li><li>Changing it requires an elevated memx from Program Files</li><li>No kernel driver or service is installed</li></ul></div>
+        </div>
+        <div class="panel" role="tabpanel" id="panel-compact" aria-labelledby="tab-compact" hidden>
+          <figure class="phone"><picture><source srcset="assets/screenshots/mobile-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/mobile.png" width="390" height="844" loading="lazy" alt="memx in a narrow window, with the process list stacked above the inspection view."></picture></figure>
+          <div><h3>Works in small windows</h3><p>In a narrow window, panes stack vertically, so memx remains usable beside a debugger or editor.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">How it works</span>
+          <h2>From process ID to readable values</h2>
+          <p>memx uses documented Windows APIs, and every request is size-limited.</p>
+        </div>
+        <ol class="steps">
+          <li><h3>Open</h3><p>memx opens the process with query and read access only. When run as administrator, it enables <code>SeDebugPrivilege</code>.</p></li>
+          <li><h3>Map</h3><p><code>VirtualQueryEx</code> walks the address space. Modules, thread stacks, heaps, and the PEB label the regions.</p></li>
+          <li><h3>Read</h3><p>Reads are split by page and skip guard pages. Partial reads keep the bytes that are readable.</p></li>
+          <li><h3>Decode</h3><p>Symbols take priority, then RTTI, then heuristics. Each value records where its type came from.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="tour" id="cli">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Command line</span>
+          <h2>Script it with the same executable</h2>
+          <p>Pass a command to <code>memx-ui.exe</code> to use the CLI. Add <code>--json</code> for machine-readable output.</p>
+        </div>
+        <div class="commands">
+          <div class="code-card">
+            <header>Inspect<button class="copy" type="button" data-copy="inspect"><svg class="icon"><use href="#i-copy"/></svg>Copy</button></header>
+<pre id="inspect"><span class="c"># Run from an elevated PowerShell</span>
+$memx = 'C:\Program Files\memx\memx-ui.exe'
+&amp; $memx ps --filter 'notepad*' | Out-Host
+&amp; $memx regions --pid 1234 --readable | Out-Host
+&amp; $memx inspect --pid 1234 --addr 0x1f2a0000 | Out-Host
+&amp; $memx read --pid 1234 --addr 'app.exe+0x10' --as 'u32[4]' | Out-Host</pre>
+          </div>
+          <div class="code-card">
+            <header>Search, symbols, dumps<button class="copy" type="button" data-copy="more"><svg class="icon"><use href="#i-copy"/></svg>Copy</button></header>
+<pre id="more">&amp; $memx search --pid 1234 --string 'hello' | Out-Host
+&amp; $memx symbol --pid 1234 'kernel32!CreateFileW' | Out-Host
+&amp; $memx globals --pid 1234 --module app.exe | Out-Host
+&amp; $memx dump --pid 1234 --file 'D:\dumps\app.dmp' --json | Out-Host
+&amp; $memx tui --pid 1234</pre>
+          </div>
+        </div>
+        <p class="note">The desktop executable does not keep PowerShell attached to it, so pipe CLI commands to <code>Out-Host</code> or redirect them to a file to receive their output and exit code.</p>
+      </div>
+    </section>
+
+    <section id="limits">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Access limits</span>
+          <h2>Clear about what Windows allows</h2>
+          <p>Administrator rights let memx read more processes, but not all of them. memx does not bypass Windows protections.</p>
+        </div>
+        <div class="limits">
+          <div class="limit-card">
+            <h3><svg class="icon"><use href="#i-shield"/></svg>What memx can read</h3>
+            <ul>
+              <li>Processes your account can open, plus most services when run as administrator</li>
+              <li>x86 (WOW64) processes, using 4-byte pointers, from either build</li>
+              <li>Committed, readable pages, read live or from a point-in-time snapshot</li>
+            </ul>
+          </div>
+          <div class="limit-card warn">
+            <h3><svg class="icon"><use href="#i-lock"/></svg>What stays off limits</h3>
+            <ul>
+              <li>Protected processes (PP/PPL), such as LSASS with RunAsPPL and antivirus services</li>
+              <li>Kernel memory, VBS-protected memory, guard pages, and uncommitted pages</li>
+              <li>64-bit processes from the x86 build; use the x64 build for those</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="build" id="build">
+      <div class="wrap build-grid">
+        <div class="section-head">
+          <span class="eyebrow">Build from source</span>
+          <h2>Clone, build, and run</h2>
+          <p>The Rust toolchain version is set in <code>rust-toolchain.toml</code>. Pull requests are compiled and tested for x64 and x86; each merged pull request publishes a release.</p>
+          <ul class="reqs">
+            <li>Windows 10 or 11 <span>x64 host</span></li>
+            <li>Rust <span>installed by rustup from rust-toolchain.toml</span></li>
+            <li>Visual Studio Build Tools <span>C++ and Windows SDK</span></li>
+            <li>Node.js <span>22 LTS</span></li>
+            <li>WebView2 <span>included in Windows 11</span></li>
+          </ul>
+        </div>
+        <div class="code-card">
+          <header>PowerShell<button class="copy" type="button" data-copy="build-steps"><svg class="icon"><use href="#i-copy"/></svg>Copy</button></header>
+<pre id="build-steps">git clone https://github.com/arteficent/memx.git
+cd memx
+npm ci
+npm run build                       <span class="c"># web assets embedded in the exe</span>
+cargo test --features desktop-ui    <span class="c"># run unit and integration tests</span>
+npm run tauri -- dev                <span class="c"># run with hot reload</span>
+npm run tauri -- build              <span class="c"># build the exe and installer</span>
+npm run tauri -- build --target i686-pc-windows-msvc  <span class="c"># x86 build</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="tour" id="license">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">License</span>
+          <h2>Free and open source</h2>
+          <p>memx is dual-licensed under the MIT License and the Apache License 2.0. You may use, modify, and redistribute it under either license, at your option.</p>
+        </div>
+        <div class="licenses">
+          <a class="license-card" href="https://github.com/arteficent/memx/blob/main/LICENSE-MIT">
+            <svg class="icon"><use href="#i-file"/></svg>
+            <span><strong>MIT License</strong><small>A short, permissive license. Keep the copyright and license notice in copies of the software.</small></span>
+          </a>
+          <a class="license-card" href="https://github.com/arteficent/memx/blob/main/LICENSE-APACHE">
+            <svg class="icon"><use href="#i-scale"/></svg>
+            <span><strong>Apache License 2.0</strong><small>Permissive, with an explicit patent grant. State significant changes in modified files.</small></span>
+          </a>
+        </div>
+        <p class="note">SPDX: <code>MIT OR Apache-2.0</code>. Copyright &copy; 2026 Sourabh Singh. Unless you state otherwise, contributions you submit are dual-licensed under the same terms. IBM Plex fonts are under the <a href="assets/fonts/OFL.txt">SIL Open Font License 1.1</a>, and <a href="https://lucide.dev">Lucide</a> icons are under the ISC License.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span>&copy; 2026 Sourabh Singh &middot; <a href="#license">MIT OR Apache-2.0</a></span>
+      <nav aria-label="Project links">
+        <a href="https://github.com/arteficent/memx#readme">README</a>
+        <a href="https://github.com/arteficent/memx/blob/main/docs/ARCHITECTURE.md">Architecture</a>
+        <a href="https://github.com/arteficent/memx/releases">Releases</a>
+        <a href="https://github.com/arteficent/memx/issues">Issues</a>
+        <a href="https://github.com/arteficent/memx/blob/main/LICENSE-MIT">LICENSE-MIT</a>
+        <a href="https://github.com/arteficent/memx/blob/main/LICENSE-APACHE">LICENSE-APACHE</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    const select = (tab) => {
+      for (const item of tabs) {
+        const active = item === tab;
+        item.setAttribute('aria-selected', String(active));
+        item.tabIndex = active ? 0 : -1;
+        document.getElementById(item.getAttribute('aria-controls')).hidden = !active;
+      }
+    };
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (event) => {
+        const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+        if (!step) return;
+        const next = tabs[(index + step + tabs.length) % tabs.length];
+        select(next);
+        next.focus();
+      });
+    });
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const text = document.getElementById(button.dataset.copy).innerText.replace(/\s+#.*$/gm, '').replace(/^#.*\n/gm, '');
+        try {
+          await navigator.clipboard.writeText(text);
+          button.innerHTML = '<svg class="icon"><use href="#i-check"/></svg>Copied';
+        } catch {
+          button.textContent = 'Select and copy';
+        }
+        setTimeout(() => { button.innerHTML = '<svg class="icon"><use href="#i-copy"/></svg>Copy'; }, 1600);
+      });
+    });
+  </script>
+</body>
+</html>
