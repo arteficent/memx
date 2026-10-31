@@ -3,3 +3,12 @@
 /ui/dist
 /icons
 /gen
+
+# Process dumps and exports can contain secrets
+*.dmp
+
+# graphify machine-local state (graph.html, graph.json, GRAPH_REPORT.md are committed)
+/graphify-out/cache/
+/graphify-out/manifest.json
+/graphify-out/.graphify_*
+!/graphify-out/.graphify_labels.json

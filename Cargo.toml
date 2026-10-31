@@ -1,0 +1,70 @@
+[package]
+name = "memx"
+version = "0.1.0"
+edition = "2021"
+description = "Lightweight read-only process memory inspector"
+default-run = "memx-ui"
+
+[[bin]]
+name = "memx-ui"
+path = "src/bin/memx-ui.rs"
+required-features = ["desktop-ui"]
+
+[[bin]]
+name = "memx"
+path = "src/main.rs"
+
+# Test target with known data at known addresses (used by integration tests).
+[[bin]]
+name = "memx-fixture"
+path = "fixture/main.rs"
+test = false
+doc = false
+
+[features]
+default = ["tui"]
+tui = ["dep:ratatui"]
+desktop-ui = ["dep:tauri", "dep:tauri-build", "dep:tauri-plugin-dialog"]
+
+[build-dependencies]
+tauri-build = { version = "2", optional = true , features = [] }
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", optional = true , features = [] }
+tauri-plugin-dialog = { version = "2", optional = true }
+ratatui = { version = "0.30", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = [
+    "Win32_Foundation", "Win32_System_Com", "Win32_System_TaskScheduler",
+    "Win32_System_Variant", "Win32_System_Ole", "Win32_UI_Shell",
+] }
+windows-sys = { version = "0.61", features = [
+    "Wdk_System_SystemInformation",
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_Diagnostics_ProcessSnapshotting",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_Kernel",
+    "Win32_System_Memory",
+    "Win32_System_ProcessStatus",
+    "Win32_System_RemoteDesktop",
+    "Win32_System_Registry",
+    "Win32_System_SystemInformation",
+    "Win32_System_Threading",
+    "Win32_System_WindowsProgramming",
+] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true

@@ -1,0 +1,90 @@
+name: Pull request
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pull-request-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check version files agree
+        run: node scripts/version.mjs check
+
+      - name: Require an unreleased version
+        run: |
+          version="$(node scripts/version.mjs check)"
+          if git rev-parse -q --verify "refs/tags/v${version}" >/dev/null; then
+            echo "::error file=Cargo.toml::v${version} is already released. Bump it with: npm run version:set -- <next-version>"
+            exit 1
+          fi
+          echo "Merging this pull request releases v${version}"
+
+  test:
+    name: Build and test (${{ matrix.arch }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            target: x86_64-pc-windows-msvc
+          - arch: x86
+            target: i686-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Clippy
+        run: cargo clippy --locked --all-targets --features desktop-ui --target ${{ matrix.target }} -- -D warnings
+
+      - name: Test
+        run: cargo test --locked --features desktop-ui --target ${{ matrix.target }}
+
+      - name: Test WOW64 inspection from the x64 build
+        if: matrix.arch == 'x64'
+        shell: pwsh
+        run: |
+          cargo build --locked --bin memx-fixture --target i686-pc-windows-msvc
+          $env:MEMX_X86_FIXTURE = (Resolve-Path target/i686-pc-windows-msvc/debug/memx-fixture.exe).Path
+          cargo test --locked --features desktop-ui --target x86_64-pc-windows-msvc --test integration desktop_reads_wow64_fixture_when_provided
+
+      - name: Compile release executable
+        run: npx tauri build --ci --no-bundle --target ${{ matrix.target }}

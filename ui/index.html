@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>memx | Memory Inspector</title>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand"><img src="/mark.svg" alt="" width="32" height="32"><strong>memx</strong><span>Memory Inspector</span></div>
+    <div class="header-actions"><span id="privilege-status" class="readonly">Privilege status</span><span class="readonly"><i data-lucide="lock-keyhole"></i>Read only</span><button id="settings-open" class="icon-button" aria-label="Settings" title="Settings"><i data-lucide="settings-2"></i></button></div>
+  </header>
+  <main class="workspace">
+    <aside class="process-pane">
+      <div class="pane-heading"><h1>Processes <span id="process-count">0</span></h1><button id="process-refresh" class="icon-button" aria-label="Refresh processes" title="Refresh processes"><i data-lucide="refresh-cw"></i></button></div>
+      <label class="search-field"><i data-lucide="search"></i><input id="process-search" type="search" placeholder="Process name or PID" aria-label="Filter processes"></label>
+      <div class="segmented" role="group" aria-label="Process category"><button data-scope="all" aria-pressed="true">All</button><button data-scope="user" aria-pressed="false">User</button><button data-scope="system" aria-pressed="false">System</button></div>
+      <div class="process-list-heading"><span>Process / Owner</span><span>PID</span></div>
+      <div id="process-list" class="process-list" aria-label="Running processes"></div>
+      <div class="pane-footer"><span id="process-status">Connecting</span><span id="app-version">Windows</span></div>
+    </aside>
+    <section class="inspection-pane" aria-label="Process inspection">
+      <div class="target-heading"><div><span class="eyebrow">Selected process</span><h2 id="target-name">No process selected</h2><div id="target-detail" class="target-detail">User-mode session</div></div><div class="header-actions"><button id="process-dump" class="icon-button" aria-label="Capture process dump" title="Capture process dump" disabled><i data-lucide="download"></i></button><button id="detach" class="icon-button" aria-label="Detach process" title="Detach process" disabled><i data-lucide="unplug"></i></button></div></div>
+      <div class="metrics"><div><span>Committed</span><strong id="metric-memory">-</strong></div><div><span>Regions</span><strong id="metric-regions">-</strong></div><div><span>Modules</span><strong id="metric-modules">-</strong></div><div><span>Threads</span><strong id="metric-threads">-</strong></div></div>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <div class="browser-layout">
+        <section class="region-pane" aria-label="Address ranges">
+          <div class="view-tabs" role="tablist" aria-label="Address views"><button role="tab" data-view="regions" aria-selected="true">Regions</button><button role="tab" data-view="modules" aria-selected="false">Modules</button><button role="tab" data-view="symbols" aria-selected="false">Symbols</button></div>
+          <div id="region-controls" class="range-controls"><input id="region-search" type="search" placeholder="Label, type, address" aria-label="Filter regions"><label class="checkbox-label"><input id="readable-only" type="checkbox" checked>Readable</label></div>
+          <div id="symbol-controls" class="range-controls" hidden><select id="symbol-module" aria-label="Symbol module"></select><input id="symbol-filter" placeholder="Symbol mask" value="*" aria-label="Symbol filter"><button id="symbol-load" class="icon-button" aria-label="Load symbols" title="Load symbols"><i data-lucide="search"></i></button></div>
+          <div class="range-scroll"><table class="range-table"><thead><tr><th id="range-column">Address / Label</th><th>Size</th></tr></thead><tbody id="range-list"></tbody></table><div id="range-empty" class="empty-state"><i data-lucide="layers"></i><span>No address ranges</span></div></div>
+          <div class="range-pagination"><span id="range-count">0 ranges</span><div><button id="range-previous" class="icon-button" aria-label="Previous range page" title="Previous range page" disabled><i data-lucide="chevron-left"></i></button><button id="range-next" class="icon-button" aria-label="Next range page" title="Next range page" disabled><i data-lucide="chevron-right"></i></button></div></div>
+        </section>
+        <section class="memory-pane" aria-label="Memory values">
+          <form id="address-form" class="address-toolbar"><label class="address-input"><span>Address</span><input id="address" placeholder="0x... or module!symbol" aria-label="Memory address" autocomplete="off" spellcheck="false"></label><button id="read-address" class="icon-button primary" type="submit" aria-label="Read address" title="Read address" disabled><i data-lucide="arrow-right"></i></button></form>
+          <div class="decode-toolbar"><div class="navigation"><button id="memory-back" class="icon-button" aria-label="Go back" title="Go back" disabled><i data-lucide="undo-2"></i></button><button id="memory-previous" class="icon-button" aria-label="Previous memory page" title="Previous memory page" disabled><i data-lucide="chevron-left"></i></button><button id="memory-next" class="icon-button" aria-label="Next memory page" title="Next memory page" disabled><i data-lucide="chevron-right"></i></button><button id="memory-refresh" class="icon-button" aria-label="Refresh regions and memory" title="Refresh regions and memory" disabled><i data-lucide="refresh-cw"></i></button></div><label>Bytes<input id="read-length" type="number" min="1" max="4096" step="1" value="256" aria-label="Read length"></label><label>As<select id="data-type" aria-label="Data type"><option value="auto">Auto</option><option>hex</option><option>u8</option><option>i8</option><option>u16</option><option>i16</option><option>u32</option><option>i32</option><option>u64</option><option>i64</option><option>f32</option><option>f64</option><option>bool</option><option>ptr</option><option>cstr</option><option>wstr</option><option>guid</option><option>filetime</option></select></label></div>
+          <div class="memory-scroll"><div class="section-caption"><h3>Raw Memory</h3><span id="read-summary">No snapshot</span></div><div id="hex-view" class="hex-view"><div class="memory-empty"><i data-lucide="binary"></i><span>No memory snapshot</span></div></div><div class="section-caption value-caption"><h3>Decoded Values</h3><span id="value-count">0 values</span></div><table class="value-table"><thead><tr><th>Address / Type</th><th>Value</th><th>Source</th></tr></thead><tbody id="value-list"></tbody></table></div>
+          <div class="pane-footer"><span id="operation-status" aria-live="polite">Ready</span><span id="snapshot-time">Live, non-atomic reads</span></div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <dialog id="settings-dialog"><form id="settings-form"><div class="dialog-heading"><h2>Settings</h2><button id="settings-close" type="button" class="icon-button" aria-label="Close settings" title="Close settings"><i data-lucide="x"></i></button></div><label class="setting-row"><span>Launch at sign-in</span><input id="startup-enabled" type="checkbox" role="switch"></label><div id="startup-status" class="setting-status">Startup status unavailable</div><label class="setting-row"><span>PDB symbols</span><input id="symbols-enabled" type="checkbox" role="switch"></label><label class="stacked-label">Symbol search path<input id="symbol-path" placeholder="_NT_SYMBOL_PATH" maxlength="2048" spellcheck="false"></label><div class="setting-status">Kernel driver: not installed</div><div id="settings-error" class="notice" role="status" hidden></div><div class="dialog-footer"><button id="settings-save" class="command-button" type="submit"><i data-lucide="check"></i>Apply</button></div></form></dialog>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

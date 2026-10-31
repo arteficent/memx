@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "memx",
+  "identifier": "dev.memx.inspector",
+  "mainBinaryName": "memx-ui",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run desktop-assets",
+    "frontendDist": "ui/dist",
+    "features": ["desktop-ui"]
+  },
+  "app": {
+    "windows": [{ "label": "main", "title": "memx | Memory Inspector", "width": 1440, "height": 920, "minWidth": 720, "minHeight": 600 }],
+    "security": {
+      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico", "icons/32x32.png", "icons/128x128.png"],
+    "windows": { "webviewInstallMode": { "type": "embedBootstrapper", "silent": true }, "nsis": { "installMode": "perMachine" } }
+  }
+}

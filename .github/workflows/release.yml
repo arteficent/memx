@@ -1,0 +1,161 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  detect:
+    name: Detect merged pull request
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      release: ${{ steps.merge.outputs.release }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node scripts/version.mjs check)" >> "$GITHUB_OUTPUT"
+
+      - name: Detect pull request merge
+        id: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "::error::Manual releases must run on main"
+              exit 1
+            fi
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pr="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+            --jq '[.[] | select(.merged_at != null and .base.ref == "main")][0].number // empty')"
+          if [ -z "$pr" ]; then
+            echo "::notice::$GITHUB_SHA is a direct push, not a pull request merge; no release"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Merged pull request #$pr"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Require an unreleased version
+        if: steps.merge.outputs.release == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/v${VERSION}" >/dev/null; then
+            echo "::error file=Cargo.toml::v${VERSION} already exists; bump the version before merging"
+            exit 1
+          fi
+
+  build:
+    name: Build ${{ matrix.arch }}
+    needs: detect
+    if: needs.detect.outputs.release == 'true'
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            target: x86_64-pc-windows-msvc
+          - arch: x86
+            target: i686-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build executable and installer
+        run: npx tauri build --ci --target ${{ matrix.target }} --bundles nsis
+
+      - name: Collect versioned artifacts
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.detect.outputs.version }}
+          ARCH: ${{ matrix.arch }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          $release = "target/$env:TARGET/release"
+          $exe = Get-Item "$release/memx-ui.exe"
+          if ($exe.VersionInfo.ProductVersion -ne $env:VERSION) {
+            throw "memx-ui.exe ProductVersion '$($exe.VersionInfo.ProductVersion)' does not match $env:VERSION"
+          }
+          $setup = @(Get-ChildItem "$release/bundle/nsis" -Filter '*-setup.exe')
+          if ($setup.Count -ne 1) { throw "Expected one NSIS installer, found $($setup.Count)" }
+          New-Item -ItemType Directory dist | Out-Null
+          Copy-Item $exe.FullName "dist/memx-$env:VERSION-windows-$env:ARCH.exe"
+          Copy-Item $setup[0].FullName "dist/memx-$env:VERSION-windows-$env:ARCH-setup.exe"
+          Get-ChildItem dist | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memx-windows-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    needs: [detect, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Write checksums
+        working-directory: dist
+        run: sha256sum memx-* > SHA256SUMS.txt
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.detect.outputs.version }}
+        run: |
+          prerelease=()
+          case "$VERSION" in *-*) prerelease=(--prerelease) ;; esac
+          gh release create "v${VERSION}" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "memx v${VERSION}" \
+            --notes "Windows x64 and x86 builds. The executables request administrator rights through UAC. The x86 build inspects 32-bit processes only; use x64 for 64-bit processes. Binaries are unsigned; verify them with SHA256SUMS.txt." \
+            --generate-notes \
+            "${prerelease[@]}"
