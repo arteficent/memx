@@ -14,7 +14,10 @@ point-in-time `.dmp` snapshots for WinDbg.
 [Implementation plan](docs/PLAN.md) ·
 [License: MIT OR Apache-2.0](#license)
 
-![memx desktop app showing a selected process, its memory regions, a hex dump, and decoded values](docs/assets/screenshots/overview.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/overview-dark.png">
+  <img src="docs/assets/screenshots/overview.png" alt="memx desktop app showing a selected process, its memory regions, a hex dump, and decoded values">
+</picture>
 
 ## Contents
 
@@ -43,20 +46,21 @@ point-in-time `.dmp` snapshots for WinDbg.
 | **Snapshot dumps** | Uses Windows Process Snapshotting to capture memory at a defined moment, then writes a standard full-memory minidump. |
 | **One executable** | `memx-ui.exe` opens the GUI when started without arguments and runs CLI or TUI commands when given a command such as `ps`, `read`, or `dump`. |
 | **Admin launch** | Release builds request administrator rights through UAC. Optional sign-in startup runs with your account's highest privileges. |
+| **Light and dark** | The desktop app and website follow the Windows or browser color theme automatically. |
 | **x64 and x86** | The x64 build inspects 64-bit and 32-bit (WOW64) processes. The x86 build inspects 32-bit processes. |
 
 ## Screenshots
 
-Screenshots use the bundled demo fixture process. User names and paths are
-anonymized.
+Screenshots use the bundled demo fixture process and follow your GitHub light
+or dark theme. User names and paths are anonymized.
 
 | Browse and decode | Exact types from PDB symbols |
 |---|---|
-| ![Heap memory decoded into integers, a double, floats, and strings](docs/assets/screenshots/overview.png) | ![Global struct decoded from its PDB with named fields](docs/assets/screenshots/symbols.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/overview-dark.png"><img src="docs/assets/screenshots/overview.png" alt="Heap memory decoded into integers, a double, floats, and strings"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/symbols-dark.png"><img src="docs/assets/screenshots/symbols.png" alt="Global struct decoded from its PDB with named fields"></picture> |
 | **Capture a snapshot dump** | **Settings** |
-| ![Notice confirming a process dump was saved, with its capture time](docs/assets/screenshots/dump.png) | ![Settings dialog with sign-in startup and PDB symbol options](docs/assets/screenshots/settings.png) |
+| <picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/dump-dark.png"><img src="docs/assets/screenshots/dump.png" alt="Notice confirming a process dump was saved, with its capture time"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/settings-dark.png"><img src="docs/assets/screenshots/settings.png" alt="Settings dialog with sign-in startup and PDB symbol options"></picture> |
 
-<p align="center"><img src="docs/assets/screenshots/mobile.png" width="260" alt="memx in a narrow window with stacked panes"></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/mobile-dark.png"><img src="docs/assets/screenshots/mobile.png" width="260" alt="memx in a narrow window with stacked panes"></picture></p>
 
 ## Install
 

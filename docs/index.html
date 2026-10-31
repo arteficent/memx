@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f5f7f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111615" media="(prefers-color-scheme: dark)">
   <title>memx | Windows process memory inspector</title>
   <meta name="description" content="memx is a read-only Windows process memory inspector built with Rust and Tauri. Browse every process, map memory regions, decode typed values with provenance, and capture point-in-time dumps.">
   <meta property="og:title" content="memx | Windows process memory inspector">
@@ -70,7 +73,7 @@
         </div>
         <div class="window">
           <div class="window-bar" aria-hidden="true"><span></span><span></span><span></span><b>memx | Memory Inspector</b></div>
-          <img src="assets/screenshots/overview.png" width="1440" height="900" alt="memx desktop window with a process selected, its memory regions listed, a hex dump, and decoded values labeled with their source.">
+          <picture><source srcset="assets/screenshots/overview-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/overview.png" width="1440" height="900" alt="memx desktop window with a process selected, its memory regions listed, a hex dump, and decoded values labeled with their source."></picture>
         </div>
       </div>
     </div>
@@ -98,7 +101,7 @@
         <div class="section-head">
           <span class="eyebrow">Tour</span>
           <h2>A quick walk through the app</h2>
-          <p>Screenshots use a demo process with known values. User names and paths are anonymized.</p>
+          <p>Screenshots use a demo process with known values and match your light or dark theme. User names and paths are anonymized.</p>
         </div>
         <div class="tabs" role="tablist" aria-label="Screenshots">
           <button class="tab" role="tab" id="tab-browse" aria-controls="panel-browse" aria-selected="true">Browse</button>
@@ -108,23 +111,23 @@
           <button class="tab" role="tab" id="tab-compact" aria-controls="panel-compact" aria-selected="false" tabindex="-1">Compact</button>
         </div>
         <div class="panel" role="tabpanel" id="panel-browse" aria-labelledby="tab-browse">
-          <figure><img src="assets/screenshots/overview.png" width="1440" height="900" loading="lazy" alt="Heap memory of the demo process decoded into integers, a double, floats, and strings."></figure>
+          <figure><picture><source srcset="assets/screenshots/overview-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/overview.png" width="1440" height="900" loading="lazy" alt="Heap memory of the demo process decoded into integers, a double, floats, and strings."></picture></figure>
           <div><h3>Browse and decode</h3><p>Select a process, click a region, and memx reads it page by page. Unreadable bytes show as <code>??</code>, so a gap is never mistaken for data.</p><ul><li>Choose Auto, or force a type such as <code>u64</code>, <code>f64</code>, or <code>wstr</code></li><li>Page forward and back through memory</li><li>Refresh to re-read live values</li></ul></div>
         </div>
         <div class="panel" role="tabpanel" id="panel-symbols" aria-labelledby="tab-symbols" hidden>
-          <figure><img src="assets/screenshots/symbols.png" width="1440" height="900" loading="lazy" alt="A global struct decoded from its PDB, showing named fields with high-confidence symbol provenance."></figure>
+          <figure><picture><source srcset="assets/screenshots/symbols-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/symbols.png" width="1440" height="900" loading="lazy" alt="A global struct decoded from its PDB, showing named fields with high-confidence symbol provenance."></picture></figure>
           <div><h3>Exact types from PDBs</h3><p>Turn on PDB symbols in Settings and enter <code>module!symbol</code>. Struct fields show their declared names and types.</p><ul><li>Symbol path supports <code>_NT_SYMBOL_PATH</code> syntax</li><li>Export tables name functions even without PDBs</li><li>MSVC RTTI identifies C++ objects and vtables</li></ul></div>
         </div>
         <div class="panel" role="tabpanel" id="panel-dump" aria-labelledby="tab-dump" hidden>
-          <figure><img src="assets/screenshots/dump.png" width="1440" height="900" loading="lazy" alt="Notice confirming a 10.5 MiB process dump was saved, with capture time and limitations."></figure>
+          <figure><picture><source srcset="assets/screenshots/dump-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/dump.png" width="1440" height="900" loading="lazy" alt="Notice confirming a process dump was saved, with capture time and limitations."></picture></figure>
           <div><h3>Capture a snapshot</h3><p>Click the download icon next to the process name and choose where to save. memx clones the process memory first, then writes a standard minidump from that copy.</p><ul><li>Records capture start and finish times</li><li>Removes partial files when a capture fails</li><li>Dumps can contain secrets, so store them in a protected folder</li></ul></div>
         </div>
         <div class="panel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" hidden>
-          <figure><img src="assets/screenshots/settings.png" width="1440" height="900" loading="lazy" alt="Settings dialog with sign-in startup, PDB symbols, and symbol search path."></figure>
+          <figure><picture><source srcset="assets/screenshots/settings-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/settings.png" width="1440" height="900" loading="lazy" alt="Settings dialog with sign-in startup, PDB symbols, and symbol search path."></picture></figure>
           <div><h3>Startup and symbols</h3><p>Choose whether memx starts with administrator rights when you sign in, and where it looks for PDB files.</p><ul><li>Startup uses a Task Scheduler entry for your account only</li><li>Changing it requires an elevated memx from Program Files</li><li>No kernel driver or service is installed</li></ul></div>
         </div>
         <div class="panel" role="tabpanel" id="panel-compact" aria-labelledby="tab-compact" hidden>
-          <figure class="phone"><img src="assets/screenshots/mobile.png" width="390" height="844" loading="lazy" alt="memx in a narrow window, with the process list stacked above the inspection view."></figure>
+          <figure class="phone"><picture><source srcset="assets/screenshots/mobile-dark.png" media="(prefers-color-scheme: dark)"><img src="assets/screenshots/mobile.png" width="390" height="844" loading="lazy" alt="memx in a narrow window, with the process list stacked above the inspection view."></picture></figure>
           <div><h3>Works in small windows</h3><p>In a narrow window, panes stack vertically, so memx remains usable beside a debugger or editor.</p></div>
         </div>
       </div>
