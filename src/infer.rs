@@ -342,12 +342,15 @@ pub fn annotate(ctx: &mut dyn InferCtx, r: &ReadResult, use_symbols: bool) -> Ve
             off += slot;
             continue;
         }
-        if let Some(a) = try_pointer(ctx, addr, v) {
+        let string = detect_string(&r.bytes[off..], &r.valid[off..]);
+        // Text longer than one slot cannot be a single pointer, even if its first slot maps (e.g. "w\0i\0" = 0x00690077 on x86).
+        let spans_slots = string.as_ref().is_some_and(|(len, _, wide)| len.saturating_sub(if *wide { 2 } else { 1 }) > ps);
+        if let Some(a) = try_pointer(ctx, addr, v).filter(|_| !spans_slots) {
             out.push(a);
             off += slot;
             continue;
         }
-        if let Some((len, s, wide)) = detect_string(&r.bytes[off..], &r.valid[off..]) {
+        if let Some((len, s, wide)) = string {
             let len = len.min(n - off);
             let conf = if len >= 8 { High } else { Medium };
             out.push(Annotation::new(addr, len, if wide { "wstr" } else { "cstr" }, s, conf, Source::Heuristic));
@@ -435,6 +438,19 @@ pub(crate) mod tests {
         assert_eq!(a[0].ty, "wstr");
         assert_eq!(a[0].value, "\"Hi there\"");
         assert_eq!(a.last().unwrap().ty, "unreadable");
+    }
+
+    #[test]
+    fn x86_text_wins_over_a_coincidentally_mapped_pointer() {
+        // "wide-heap" as UTF-16 starts with 0x00690077, which is committed here.
+        let mut ctx = Mock { map: RegionMap::new(vec![region(0x0069_0000, 0x1_0000)]), mem: vec![], ps: 4 };
+        let wide: Vec<u8> = "wide-heap\0".encode_utf16().flat_map(|u| u.to_le_bytes()).collect();
+        let a = annotate(&mut ctx, &rr(0x1000, wide), false);
+        assert_eq!((a[0].ty.as_str(), a[0].value.as_str()), ("wstr", "\"wide-heap\""));
+        // A slot that is printable only within itself stays a pointer when it maps.
+        let mut ctx = Mock { map: RegionMap::new(vec![region(0x6463_0000, 0x1_0000)]), mem: vec![], ps: 4 };
+        let a = annotate(&mut ctx, &rr(0x1000, b"abcd\0\0\0\0".to_vec()), false);
+        assert_eq!(a[0].ty, "ptr");
     }
 
     #[test]

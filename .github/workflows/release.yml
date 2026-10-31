@@ -26,11 +26,11 @@ jobs:
       release: ${{ steps.merge.outputs.release }}
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -84,7 +84,7 @@ jobs:
           - arch: x86
             target: i686-pc-windows-msvc
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain from rust-toolchain.toml
         run: rustup toolchain install
@@ -93,7 +93,7 @@ jobs:
         with:
           key: release-${{ matrix.target }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -123,7 +123,7 @@ jobs:
           Copy-Item $setup[0].FullName "dist/memx-$env:VERSION-windows-$env:ARCH-setup.exe"
           Get-ChildItem dist | Format-Table Name, Length
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: memx-windows-${{ matrix.arch }}
           path: dist/*
@@ -136,7 +136,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
