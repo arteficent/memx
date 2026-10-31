@@ -122,6 +122,14 @@ section { padding: 88px 0; }
 .reqs li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 .reqs span { color: var(--muted); text-align: right; }
 
+.licenses { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.license-card { display: flex; gap: 16px; align-items: flex-start; padding: 24px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); text-decoration: none; }
+.license-card:hover { border-color: var(--accent); background: var(--accent-soft); }
+.license-card svg.icon { width: 26px; height: 26px; color: var(--accent); }
+.license-card strong { display: block; font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.license-card small { display: block; color: var(--muted); font-size: 15px; }
+.facts a { color: inherit; }
+
 .site-footer { padding: 36px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
 .site-footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; justify-content: space-between; }
 .site-footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
@@ -133,7 +141,7 @@ section { padding: 88px 0; }
   .features { grid-template-columns: 1fr 1fr; }
   .panel { grid-template-columns: 1fr; gap: 24px; }
   .steps { grid-template-columns: 1fr 1fr; }
-  .commands, .limits, .build-grid { grid-template-columns: 1fr; }
+  .commands, .limits, .build-grid, .licenses { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {

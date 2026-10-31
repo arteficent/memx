@@ -11,7 +11,8 @@ point-in-time `.dmp` snapshots for WinDbg.
 [Website](https://arteficent.github.io/memx/) ·
 [Download](https://github.com/arteficent/memx/releases/latest) ·
 [Architecture](docs/ARCHITECTURE.md) ·
-[Implementation plan](docs/PLAN.md)
+[Implementation plan](docs/PLAN.md) ·
+[License: MIT OR Apache-2.0](#license)
 
 ![memx desktop app showing a selected process, its memory regions, a hex dump, and decoded values](docs/assets/screenshots/overview.png)
 
@@ -28,6 +29,7 @@ point-in-time `.dmp` snapshots for WinDbg.
 - [Testing](#testing)
 - [Versioning and releases](#versioning-and-releases)
 - [Project layout](#project-layout)
+- [License](#license)
 
 ## Features
 
@@ -290,3 +292,23 @@ scripts/version.mjs Version check/set tool
 The `graphify-out/` folder contains a knowledge graph of the codebase. Open
 `graphify-out/graph.html` in a browser, or start with
 `graphify-out/GRAPH_REPORT.md`.
+
+## License
+
+Copyright (c) 2026 Sourabh Singh.
+
+memx is free and open source software, licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+
+at your option. SPDX identifier: `MIT OR Apache-2.0`.
+
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in memx by you, as defined in the Apache-2.0 license,
+shall be dual licensed as above, without any additional terms or conditions.
+
+Third-party assets keep their own licenses: IBM Plex fonts are under the
+[SIL Open Font License 1.1](docs/assets/fonts/OFL.txt), and
+[Lucide](https://lucide.dev) icons are under the ISC License. Rust crates and
+npm packages are licensed by their respective authors.

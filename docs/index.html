@@ -28,6 +28,8 @@
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
     <symbol id="i-binary" viewBox="0 0 24 24"><rect x="14" y="14" width="4" height="6" rx="2"/><rect x="6" y="4" width="4" height="6" rx="2"/><path d="M6 20h4M14 10h4M6 14h2v6M14 4h2v6"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/></symbol>
   </svg>
 
   <a class="skip" href="#main">Skip to content</a>
@@ -41,6 +43,7 @@
         <a href="#cli">Command line</a>
         <a href="#limits">Access limits</a>
         <a href="#build">Build</a>
+        <a href="#license">License</a>
       </nav>
       <a class="button small" href="https://github.com/arteficent/memx"><svg class="icon"><use href="#i-github"/></svg><span>GitHub</span></a>
     </div>
@@ -62,6 +65,7 @@
             <li>Read-only</li>
             <li>GUI, CLI, and TUI in one exe</li>
             <li>Rust + Tauri</li>
+            <li><a href="#license">Open source: MIT OR Apache-2.0</a></li>
           </ul>
         </div>
         <div class="window">
@@ -227,16 +231,39 @@ npm run tauri -- build --target i686-pc-windows-msvc  <span class="c"># x86 buil
         </div>
       </div>
     </section>
+
+    <section class="tour" id="license">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">License</span>
+          <h2>Free and open source</h2>
+          <p>memx is dual-licensed under the MIT License and the Apache License 2.0. You may use, modify, and redistribute it under either license, at your option.</p>
+        </div>
+        <div class="licenses">
+          <a class="license-card" href="https://github.com/arteficent/memx/blob/main/LICENSE-MIT">
+            <svg class="icon"><use href="#i-file"/></svg>
+            <span><strong>MIT License</strong><small>A short, permissive license. Keep the copyright and license notice in copies of the software.</small></span>
+          </a>
+          <a class="license-card" href="https://github.com/arteficent/memx/blob/main/LICENSE-APACHE">
+            <svg class="icon"><use href="#i-scale"/></svg>
+            <span><strong>Apache License 2.0</strong><small>Permissive, with an explicit patent grant. State significant changes in modified files.</small></span>
+          </a>
+        </div>
+        <p class="note">SPDX: <code>MIT OR Apache-2.0</code>. Copyright &copy; 2026 Sourabh Singh. Unless you state otherwise, contributions you submit are dual-licensed under the same terms. IBM Plex fonts are under the <a href="assets/fonts/OFL.txt">SIL Open Font License 1.1</a>, and <a href="https://lucide.dev">Lucide</a> icons are under the ISC License.</p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap">
-      <span>memx: Windows process memory inspector, built with Rust and Tauri.</span>
+      <span>&copy; 2026 Sourabh Singh &middot; <a href="#license">MIT OR Apache-2.0</a></span>
       <nav aria-label="Project links">
         <a href="https://github.com/arteficent/memx#readme">README</a>
         <a href="https://github.com/arteficent/memx/blob/main/docs/ARCHITECTURE.md">Architecture</a>
         <a href="https://github.com/arteficent/memx/releases">Releases</a>
         <a href="https://github.com/arteficent/memx/issues">Issues</a>
+        <a href="https://github.com/arteficent/memx/blob/main/LICENSE-MIT">LICENSE-MIT</a>
+        <a href="https://github.com/arteficent/memx/blob/main/LICENSE-APACHE">LICENSE-APACHE</a>
       </nav>
     </div>
   </footer>

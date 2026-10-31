@@ -3,6 +3,8 @@ name = "memx"
 version = "0.1.0"
 edition = "2021"
 description = "Lightweight read-only process memory inspector"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/arteficent/memx"
 default-run = "memx-ui"
 
 [[bin]]
